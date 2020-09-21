@@ -14,8 +14,8 @@ class DatabaseConnector{
         $host = "localhost";
         $port = "3306";
         $db   = "cytech";
-        $user = "root";
-        $pass = "";
+        $user = "cytech";
+        $pass = "cytech@1234!";
 
         try {
             $this->dbConnection = new \PDO(
@@ -23,7 +23,7 @@ class DatabaseConnector{
                 $user,
                 $pass
             );
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             exit($e->getMessage());
         }
     }
