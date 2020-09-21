@@ -15,8 +15,27 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri_array = explode( '/', $uri );
 
 // all of our endpoints start with /cytech/user
-// everything else results in a 404 Not Found
+// check if the user is in the URI
 if ($uri_array[2] !== 'user') {
+    header("HTTP/1.1 404 Not Found");
+    exit();
+}
+
+// In order to get the user with userid and email, the URI
+// will be like /cytech/user/userid/$userid and /cytech/user/email/$email
+// so we need to check if the values of $userid and $email are there.
+$userId = null;
+$email = null;
+if (!empty($uri_array[4])) {
+    if ($uri_array[3] == "userid") {
+        $userId = (int) $uri_array[4];
+    } else if ($uri_array[3] == "email") {
+        $email = $uri_array[4];
+    } else {
+        header("HTTP/1.1 404 Not Found");
+        exit();
+    }
+} else if (empty($uri_array[4]) && !empty($uri_array[3])) {
     header("HTTP/1.1 404 Not Found");
     exit();
 }
@@ -26,6 +45,6 @@ $dbConnection = (new DatabaseConnector())->getConnection();
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 // pass the request method to the UserController and process the HTTP request:
-$controller = new UserController($dbConnection, $requestMethod);
+$controller = new UserController($dbConnection, $requestMethod, $userId, $email);
 $controller->processRequest();
 ?>
