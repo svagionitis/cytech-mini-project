@@ -1,6 +1,15 @@
 Command line REST requests using curl
 =======================================
 
+GET requests
+-------------
+
+curl -X GET http://localhost/cytech/user
+
+curl -X GET http://localhost/cytech/user/userid/11
+
+curl -X GET http://localhost/cytech/user/email/foo.bar@foobar.tv
+
 
 POST requests
 ----------------
@@ -10,8 +19,6 @@ curl -X POST -d "{\"FirstName\":\"Pantelis\", \"LastName\":\"Thalassinos\", \"Em
 
 PUT requests
 -------------
-
-curl -X GET http://localhost/cytech/user/userid/11
 
 curl -X PUT -d "{\"FirstName\":\"Pantelis\", \"LastName\":\"Thalassinos\", \"Email\":\"pantelis.thalassinos@kriti.tv\", \"TravelDateStart\":\"2020-09-21\", \"TravelDateEnd\":\"2020-09-27\", \"TravelReason\":\"Mpla Mpla Mpla Mplou Mplou Mplou\"}" http://localhost/cytech/user/userid/11
 
