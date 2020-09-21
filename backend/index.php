@@ -14,6 +14,13 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri_array = explode( '/', $uri );
 
+// all of our endpoints start with /cytech/user
+// everything else results in a 404 Not Found
+if ($uri_array[2] !== 'user') {
+    header("HTTP/1.1 404 Not Found");
+    exit();
+}
+
 $dbConnection = (new DatabaseConnector())->getConnection();
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
