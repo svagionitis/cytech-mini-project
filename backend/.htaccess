@@ -1,5 +1,16 @@
+# Denying access to a directory listing
+# See https://httpd.apache.org/docs/current/mod/core.html#options
+Options All -Indexes
+
+# See https://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewriterule
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Deny access to api and script directory
+    # See https://help.dreamhost.com/hc/en-us/articles/216363167-How-do-I-deny-access-to-my-site-with-an-htaccess-file-
+    RewriteRule (^|/)scripts(/|$) - [F]
+    RewriteRule (^|/)api(/|$) - [F]
+
     RewriteBase "/cytech/"
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
