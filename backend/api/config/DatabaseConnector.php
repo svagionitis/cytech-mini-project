@@ -24,7 +24,8 @@ class DatabaseConnector{
                 $pass
             );
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "DB Connection Error: " . $e->getMessage();
+            exit();
         }
     }
 

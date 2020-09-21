@@ -36,7 +36,8 @@ class UserGateway {
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             return $result;
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "Error getUserAll: " . $e->getMessage();
+            exit();
         }
     }
 
@@ -60,7 +61,8 @@ class UserGateway {
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             return $result;
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "Error getUserByUserId: " . $e->getMessage();
+            exit();
         }
     }
 
@@ -84,7 +86,8 @@ class UserGateway {
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             return $result;
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "Error getUserByEmail: " . $e->getMessage();
+            exit();
         }
     }
 
@@ -112,7 +115,8 @@ class UserGateway {
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "Error addUser: " . $e->getMessage();
+            exit();
         }
     }
 
@@ -147,7 +151,8 @@ class UserGateway {
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "Error updateUserByUserId: " . $e->getMessage();
+            exit();
         }
     }
 
@@ -166,7 +171,8 @@ class UserGateway {
             $statement->execute(array('UserId' => $userId));
             return $statement->rowCount();
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            echo "Error deleteUserByUserId: " . $e->getMessage();
+            exit();
         }
     }
 

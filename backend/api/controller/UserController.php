@@ -165,7 +165,9 @@ class UserController {
     private function notFoundResponse()
     {
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
+        $response['body'] = json_encode([
+            'error' => 'Not Found'
+        ]);
         return $response;
     }
 }
