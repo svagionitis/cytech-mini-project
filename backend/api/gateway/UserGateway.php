@@ -42,6 +42,34 @@ class UserGateway {
     }
 
     /**
+     * Get all users from DB limiting the rows retrieved
+     *
+     * See https://www.php.net/manual/en/pdostatement.execute.php#76966s
+     */
+    public function getUserAllLimit($offset, $limit)
+    {
+        $statement = "
+            SELECT
+                UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason
+            FROM
+                user
+            LIMIT ?, ?;
+        ";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->bindParam(1, $offset, \PDO::PARAM_INT);
+            $statement->bindParam(2, $limit, \PDO::PARAM_INT);
+            $statement->execute();
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            echo "Error getUserAllLimit: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /**
      * Get user by a specific UserID
      */
     public function getUserByUserId($userId)
@@ -57,7 +85,8 @@ class UserGateway {
 
         try {
             $statement = $this->db->prepare($statement);
-            $statement->execute(array($userId));
+            $statement->bindParam(1, $userId, \PDO::PARAM_INT);
+            $statement->execute();
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             return $result;
         } catch (\PDOException $e) {
@@ -106,12 +135,12 @@ class UserGateway {
         try {
             $statement = $this->db->prepare($statement);
             $statement->execute(array(
-                'FirstName' => $input['FirstName'],
-                'LastName'  => $input['LastName'],
-                'Email' => $input['Email'],
-                'TravelDateStart' => $input['TravelDateStart'],
-                'TravelDateEnd' => $input['TravelDateEnd'],
-                'TravelReason' => $input['TravelReason'],
+                ':FirstName' => $input['FirstName'],
+                ':LastName'  => $input['LastName'],
+                ':Email' => $input['Email'],
+                ':TravelDateStart' => $input['TravelDateStart'],
+                ':TravelDateEnd' => $input['TravelDateEnd'],
+                ':TravelReason' => $input['TravelReason'],
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {
@@ -141,13 +170,13 @@ class UserGateway {
         try {
             $statement = $this->db->prepare($statement);
             $statement->execute(array(
-                'UserId' => (int) $userId,
-                'FirstName' => $input['FirstName'],
-                'LastName'  => $input['LastName'],
-                'Email' => $input['Email'],
-                'TravelDateStart' => $input['TravelDateStart'],
-                'TravelDateEnd' => $input['TravelDateEnd'],
-                'TravelReason' => $input['TravelReason'],
+                ':UserId' => (int) $userId,
+                ':FirstName' => $input['FirstName'],
+                ':LastName'  => $input['LastName'],
+                ':Email' => $input['Email'],
+                ':TravelDateStart' => $input['TravelDateStart'],
+                ':TravelDateEnd' => $input['TravelDateEnd'],
+                ':TravelReason' => $input['TravelReason'],
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {
@@ -168,7 +197,7 @@ class UserGateway {
 
         try {
             $statement = $this->db->prepare($statement);
-            $statement->execute(array('UserId' => $userId));
+            $statement->execute(array(':UserId' => $userId));
             return $statement->rowCount();
         } catch (\PDOException $e) {
             echo "Error deleteUserByUserId: " . $e->getMessage();

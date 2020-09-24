@@ -31,6 +31,13 @@ class UserController {
 
     public function processRequest()
     {
+        if (isset($_GET['offset']) && $_GET['offset'] != "") {
+            $offset = $_GET['offset'];
+        }
+        if (isset($_GET['limit']) && $_GET['limit'] != "") {
+            $limit = $_GET['limit'];
+        }
+
         switch ($this->requestMethod) {
             case 'GET':
                 if ($this->userId) {
@@ -40,7 +47,11 @@ class UserController {
                     $response = $this->getUserByEmail($this->email);
                 }
                 else {
-                    $response = $this->getUserAll();
+                    if (isset($offset) && isset($limit)) {
+                        $response = $this->getUserAllLimit($offset, $limit);
+                    } else {
+                        $response = $this->getUserAll();
+                    }
                 }
                 break;
             case 'POST':
@@ -65,6 +76,14 @@ class UserController {
     private function getUserAll()
     {
         $result = $this->userGateway->getUserAll();
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = json_encode($result);
+        return $response;
+    }
+
+    private function getUserAllLimit($offset, $limit)
+    {
+        $result = $this->userGateway->getUserAllLimit($offset, $limit);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = json_encode($result);
         return $response;
