@@ -37,6 +37,25 @@ class UserGateway {
     }
 
     /**
+     * Get the total rows for the user table
+     *
+     * TODO: This will be slow in large dbs. Maybe try something else to improve it.
+     */
+    public function getUserAllTotalRows()
+    {
+        $statement = "SELECT COUNT(*) AS TOTAL_COUNT FROM user;";
+
+        try {
+            $statement = $this->db->query($statement);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result[0]["TOTAL_COUNT"];
+        } catch (\PDOException $e) {
+            echo "Error getUserAllTotalRows: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /**
      * Get all users from DB limiting the rows retrieved
      *
      * See https://www.php.net/manual/en/pdostatement.execute.php#76966s
