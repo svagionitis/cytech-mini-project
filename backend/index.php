@@ -1,8 +1,6 @@
 <?php
-require 'api/config/DatabaseConnector.php';
 require 'api/controller/UserController.php';
 
-use Api\Config\DatabaseConnector;
 use Api\Controller\UserController;
 
 header("Access-Control-Allow-Origin: *");
@@ -40,11 +38,7 @@ if (!empty($uri_array[4])) {
     exit();
 }
 
-$dbConnection = (new DatabaseConnector())->getConnection();
-
-$requestMethod = $_SERVER["REQUEST_METHOD"];
-
 // pass the request method to the UserController and process the HTTP request:
-$controller = new UserController($dbConnection, $requestMethod, $userId, $email);
+$controller = new UserController($userId, $email);
 $controller->processRequest();
 ?>

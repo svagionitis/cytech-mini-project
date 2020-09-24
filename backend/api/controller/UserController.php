@@ -1,8 +1,10 @@
 <?php
 namespace Api\Controller;
 
+require 'api/config/DatabaseConnector.php';
 require 'api/gateway/UserGateway.php';
 
+use Api\Config\DatabaseConnector;
 use Api\Gateway\UserGateway;
 
 /**
@@ -17,14 +19,14 @@ class UserController {
 
     private $userGateway;
 
-    public function __construct($db, $requestMethod, $userId, $email)
+    public function __construct($userId, $email)
     {
-        $this->db = $db;
-        $this->requestMethod = $requestMethod;
+        $this->db = (new DatabaseConnector())->getConnection();
+        $this->requestMethod = $_SERVER["REQUEST_METHOD"];
         $this->userId = $userId;
         $this->email = $email;
 
-        $this->userGateway = new UserGateway($db);
+        $this->userGateway = new UserGateway($this->db);
     }
 
     public function processRequest()
