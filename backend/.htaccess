@@ -1,6 +1,7 @@
 # Denying access to a directory listing
 # See https://httpd.apache.org/docs/current/mod/core.html#options
 Options All -Indexes
+Options All +FollowSymlinks
 
 # See https://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewriterule
 <IfModule mod_rewrite.c>
@@ -14,5 +15,5 @@ Options All -Indexes
     RewriteBase "/cytech/"
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^user(.*) index.php [QSA,NC,L]
+    RewriteRule ^user(.*)$ index.php [QSA,NC,L]
 </IfModule>
