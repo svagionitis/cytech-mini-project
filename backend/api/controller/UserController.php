@@ -16,27 +16,23 @@ class UserController {
     private $requestMethod;
     private $userId;
     private $email;
+    private $page;
+    private $numberOfPages;
+    private $limit;
+    private $sort_by;
+    private $order_by;
 
     private $userGateway;
 
     public function __construct($userId, $email)
     {
-        $this->db = (new DatabaseConnector())->getConnection();
-        $this->requestMethod = $_SERVER["REQUEST_METHOD"];
         $this->userId = $userId;
         $this->email = $email;
-
-        $this->userGateway = new UserGateway($this->db);
     }
 
     public function processRequest()
     {
-        if (isset($_GET['page']) && $_GET['page'] != "") {
-            $page = $_GET['page'];
-        }
-        if (isset($_GET['limit']) && $_GET['limit'] != "") {
-            $limit = $_GET['limit'];
-        }
+        $this->preProcessRequest();
 
         switch ($this->requestMethod) {
             case 'GET':
@@ -47,8 +43,10 @@ class UserController {
                     $response = $this->getUserByEmail($this->email);
                 }
                 else {
-                    if (isset($page) && isset($limit)) {
-                        $response = $this->getUserAllPagination($page, $limit);
+                    if (isset($this->page) && isset($this->limit)) {
+                        $response = $this->getUserAllPagination();
+                    } else if (isset($this->sort_by) && isset($this->order_by)) {
+                        $response = $this->getUserAllSorting();
                     } else {
                         $response = $this->getUserAll();
                     }
@@ -73,6 +71,57 @@ class UserController {
         }
     }
 
+    private function preProcessRequest()
+    {
+        $this->db = (new DatabaseConnector())->getConnection();
+        $this->userGateway = new UserGateway($this->db);
+
+        $this->requestMethod = $_SERVER["REQUEST_METHOD"];
+
+        // Pagination
+        // TODO Create separate function
+        if (isset($_GET['page']) && $_GET['page'] != ""
+            && isset($_GET['limit']) && $_GET['limit'] != "") {
+
+            $page = $_GET['page'];
+            if ($page <= 0) {
+                $page = 1;
+            }
+            $this->page = $page;
+
+            $this->limit = $_GET['limit'];
+
+            $numberOfPages = (int) ceil($this->userGateway->getUserAllTotalRows() / $this->limit);
+            $this->numberOfPages = $numberOfPages;
+
+            // If the page number is more than the total number of pages,
+            // then return not found error.
+            if ($this->page > $this->numberOfPages) {
+                return $this->notFoundResponse();
+            }
+        }
+
+        // Sorting
+        // TODO Create separate funcion
+        if (isset($_GET['sort_by']) && $_GET['sort_by'] != ""
+            && isset($_GET['order_by']) && $_GET['order_by'] != "") {
+
+            try {
+                $this->sort_by = $this->white_list($_GET['sort_by'],
+                                                    ["FirstName", "LastName", "Email",
+                                                    "TravelDateStart", "TravelDateEnd", "TravelReason"],
+                                                    "Invalid sortby field name");
+                $this->order_by = $this->white_list($_GET['order_by'],
+                                                    ["ASC","DESC"],
+                                                    "Invalid orderby direction");
+            } catch (\InvalidArgumentException $e) {
+                return $this->notFoundResponseWithResponse($e->getMessage());
+                exit();
+            }
+        }
+
+    }
+
     private function getUserAll()
     {
         $result = $this->userGateway->getUserAll();
@@ -81,21 +130,18 @@ class UserController {
         return $response;
     }
 
-    private function getUserAllPagination($page, $limit)
+    private function getUserAllPagination()
     {
-        if ($page <= 0) {
-            $page = 1;
-        }
+        $offset = ($this->page - 1) * $this->limit;
+        $result = $this->userGateway->getUserAllLimit($offset, $this->limit);
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = json_encode($result);
+        return $response;
+    }
 
-        $numberOfPages = (int) ceil($this->userGateway->getUserAllTotalRows() / $limit);
-        // If the page number is more than the total number of pages,
-        // then return not found error.
-        if ($page > $numberOfPages) {
-            return $this->notFoundResponse();
-        }
-
-        $offset = ($page - 1) * $limit;
-        $result = $this->userGateway->getUserAllLimit($offset, $limit);
+    private function getUserAllSorting()
+    {
+        $result = $this->userGateway->getUserAllSorting($this->sort_by, $this->order_by);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = json_encode($result);
         return $response;
@@ -202,6 +248,30 @@ class UserController {
             'error' => 'Not Found'
         ]);
         return $response;
+    }
+
+    private function notFoundResponseWithResponse($message)
+    {
+        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
+        $response['body'] = json_encode([
+            'error' => $message
+        ]);
+        return $response;
+    }
+
+    /**
+     * See https://phpdelusions.net/pdo_examples/order_by
+     */
+    private function white_list(&$value, $allowed, $message) {
+        if ($value === null) {
+            return $allowed[0];
+        }
+        $key = array_search($value, $allowed, true);
+        if ($key === false) {
+            throw new \InvalidArgumentException($message);
+        } else {
+            return $value;
+        }
     }
 }
 ?>

@@ -78,6 +78,25 @@ class UserGateway {
     }
 
     /**
+     * Get all users from DB sorted by a field and order by ascending or descending
+     *
+     */
+    public function getUserAllSorting($sort_by, $order_by)
+    {
+        $statement = "SELECT * FROM user ORDER BY $sort_by $order_by;";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute();
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            echo "Error getUserAllLimit: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /**
      * Get user by a specific UserID
      */
     public function getUserByUserId($userId)
