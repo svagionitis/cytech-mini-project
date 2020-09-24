@@ -24,12 +24,7 @@ class UserGateway {
      */
     public function getUserAll()
     {
-        $statement = "
-            SELECT
-                UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason
-            FROM
-                user;
-        ";
+        $statement = "SELECT * FROM user;";
 
         try {
             $statement = $this->db->query($statement);
@@ -48,13 +43,7 @@ class UserGateway {
      */
     public function getUserAllLimit($offset, $limit)
     {
-        $statement = "
-            SELECT
-                UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason
-            FROM
-                user
-            LIMIT ?, ?;
-        ";
+        $statement = "SELECT * FROM user LIMIT ?, ?;";
 
         try {
             $statement = $this->db->prepare($statement);
@@ -74,14 +63,7 @@ class UserGateway {
      */
     public function getUserByUserId($userId)
     {
-        $statement = "
-            SELECT
-                UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason
-            FROM
-                user
-            WHERE
-                UserID = ?;
-        ";
+        $statement = "SELECT * FROM user WHERE UserID = ?;";
 
         try {
             $statement = $this->db->prepare($statement);
@@ -100,14 +82,7 @@ class UserGateway {
      */
     public function getUserByEmail($email)
     {
-        $statement = "
-            SELECT
-                UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason
-            FROM
-                user
-            WHERE
-                Email = ?;
-        ";
+        $statement = "SELECT * FROM user WHERE Email = ?;";
 
         try {
             $statement = $this->db->prepare($statement);
