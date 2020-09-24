@@ -86,6 +86,14 @@ class UserController {
         if ($page <= 0) {
             $page = 1;
         }
+
+        $numberOfPages = (int) ceil($this->userGateway->getUserAllTotalRows() / $limit);
+        // If the page number is more than the total number of pages,
+        // then return not found error.
+        if ($page > $numberOfPages) {
+            return $this->notFoundResponse();
+        }
+
         $offset = ($page - 1) * $limit;
         $result = $this->userGateway->getUserAllLimit($offset, $limit);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
