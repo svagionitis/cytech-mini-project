@@ -19,16 +19,13 @@ if ($uri_array[2] !== 'user') {
     exit();
 }
 
-// In order to get the user with userid and email, the URI
-// will be like /cytech/user/userid/$userid and /cytech/user/email/$email
-// so we need to check if the values of $userid and $email are there.
+// In order to get the user with userid, the URI will be
+// like /cytech/user/userid/$userid so we need to check
+// if the value of $userid is there.
 $userId = null;
-$email = null;
 if (!empty($uri_array[4])) {
     if ($uri_array[3] == "userid") {
         $userId = (int) $uri_array[4];
-    } else if ($uri_array[3] == "email") {
-        $email = $uri_array[4];
     } else {
         header("HTTP/1.1 404 Not Found");
         exit();
@@ -39,6 +36,6 @@ if (!empty($uri_array[4])) {
 }
 
 // pass the request method to the UserController and process the HTTP request:
-$controller = new UserController($userId, $email);
+$controller = new UserController($userId);
 $controller->processRequest();
 ?>

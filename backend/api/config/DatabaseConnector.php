@@ -11,6 +11,7 @@ class DatabaseConnector{
 
     public function __construct()
     {
+        // TODO Not the proper way to do, but it's ok for now
         $host = "localhost";
         $port = "3306";
         $db   = "cytech";

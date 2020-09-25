@@ -3,12 +3,8 @@
 namespace Api\Gateway;
 
 /**
- * A user gateway in order to
- * * get all users
- * * get a specific user
- * * add a user
- * * update a user
- * * delete a user
+ * The main class communicating with the db and sending SQL queries
+ *
  * TODO Need proper error handling.
  */
 class UserGateway {
@@ -23,7 +19,7 @@ class UserGateway {
     /**
      * Get the total rows for the user table
      *
-     * TODO: This will be slow in large dbs. Maybe try something else to improve it.
+     * TODO This will be slow in large dbs. Maybe try something else to improve it.
      */
     public function getUserAllTotalRows()
     {
@@ -40,13 +36,25 @@ class UserGateway {
     }
 
     /**
-     * Get all users from DB
+     * This function get the users from db and also performs some basic filtering, sorting and paging
+     *
+     * @param $filter_by The field name to filter the data
+     * @param $filter_by_value The value of the field name to filter the data
+     * @param $sort_by The field name to sort the data
+     * @param $order_by The direction to sort the data ascending or descending
+     * @param $offset The number of rows to skip
+     * @param $limit The total number of rows to retrieve
+     *
+     * TODO Needs a proper query builder to do any checks and everything
      */
-    public function getUserAllLimitSort($sort_by, $order_by, $offset, $limit)
+    public function getUserAllLimitSortFilter($filter_by, $filter_by_value, $sort_by, $order_by, $offset, $limit)
     {
         $statement = "SELECT * FROM user";
 
-        print_r("sort_by: $sort_by, order_by: $order_by, offset: $offset, limit: $limit");
+        if (isset($filter_by) && !empty($filter_by)
+            && isset($filter_by_value) && !empty($filter_by_value)) {
+            $statement .= " WHERE $filter_by = '$filter_by_value'";
+        }
 
         if (isset($sort_by) && !empty($sort_by)) {
             $statement .= " ORDER BY $sort_by";
@@ -77,102 +85,9 @@ class UserGateway {
     }
 
     /**
-     * Get all users from DB
-     */
-    public function getUserAll()
-    {
-        $statement = "SELECT * FROM user";
-
-        try {
-            $statement = $this->db->query($statement);
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
-        } catch (\PDOException $e) {
-            echo "Error getUserAll: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /**
-     * Get all users from DB limiting the rows retrieved
-     *
-     * See https://www.php.net/manual/en/pdostatement.execute.php#76966s
-     */
-    public function getUserAllLimit($offset, $limit)
-    {
-        $statement = "SELECT * FROM user LIMIT ?, ?";
-
-        try {
-            $statement = $this->db->prepare($statement);
-            $statement->bindParam(1, $offset, \PDO::PARAM_INT);
-            $statement->bindParam(2, $limit, \PDO::PARAM_INT);
-            $statement->execute();
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
-        } catch (\PDOException $e) {
-            echo "Error getUserAllLimit: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /**
-     * Get all users from DB sorted by a field and order by ascending or descending
-     *
-     */
-    public function getUserAllSorting($sort_by, $order_by)
-    {
-        $statement = "SELECT * FROM user ORDER BY $sort_by $order_by";
-
-        try {
-            $statement = $this->db->prepare($statement);
-            $statement->execute();
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
-        } catch (\PDOException $e) {
-            echo "Error getUserAllLimit: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /**
-     * Get user by a specific UserID
-     */
-    public function getUserByUserId($userId)
-    {
-        $statement = "SELECT * FROM user WHERE UserID = ?";
-
-        try {
-            $statement = $this->db->prepare($statement);
-            $statement->bindParam(1, $userId, \PDO::PARAM_INT);
-            $statement->execute();
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
-        } catch (\PDOException $e) {
-            echo "Error getUserByUserId: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /**
-     * Get user by a specific Email
-     */
-    public function getUserByEmail($email)
-    {
-        $statement = "SELECT * FROM user WHERE Email = ?";
-
-        try {
-            $statement = $this->db->prepare($statement);
-            $statement->execute(array($email));
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
-        } catch (\PDOException $e) {
-            echo "Error getUserByEmail: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /**
      * Add a new user to db (SQL INSERT)
+     *
+     * @param $input An array with the values to be added in db
      */
     public function addUser(Array $input)
     {
@@ -202,6 +117,9 @@ class UserGateway {
 
     /**
      * Update a user with a specific UserId (SQL UPDATE)
+     *
+     * @param $userId The UserId of the user to update
+     * @param $input An array with the values to be updated
      */
     public function updateUserByUserId($userId, Array $input)
     {
@@ -238,6 +156,8 @@ class UserGateway {
 
     /**
      * Delete a user with a specific UserId (SQL DELETE)
+     *
+     * @param $userId The UserId of the user to delete
      */
     public function deleteUserByUserId($userId)
     {
