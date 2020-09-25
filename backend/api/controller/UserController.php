@@ -32,7 +32,14 @@ class UserController {
 
     public function processRequest()
     {
-        $this->preProcessRequest();
+        $response = $this->preProcessRequest();
+        if (isset($response)) {
+            header($response['status_code_header']);
+            if ($response['body']) {
+                echo $response['body'];
+            }
+            exit();
+        }
 
         switch ($this->requestMethod) {
             case 'GET':
@@ -43,13 +50,7 @@ class UserController {
                     $response = $this->getUserByEmail($this->email);
                 }
                 else {
-                    if (isset($this->page) && isset($this->limit)) {
-                        $response = $this->getUserAllPagination();
-                    } else if (isset($this->sort_by) && isset($this->order_by)) {
-                        $response = $this->getUserAllSorting();
-                    } else {
-                        $response = $this->getUserAll();
-                    }
+                    $response = $this->getUserAllPaginationSorting();
                 }
                 break;
             case 'POST':
@@ -78,70 +79,75 @@ class UserController {
 
         $this->requestMethod = $_SERVER["REQUEST_METHOD"];
 
-        // Pagination
-        // TODO Create separate function
+        $response = $this->preProcessPaging();
+        if (isset($response)) {
+            return $response;
+        }
+
+        $response = $this->preProcessSorting();
+        if (isset($response)) {
+            return $response;
+        }
+    }
+
+    private function preProcessPaging()
+    {
         if (isset($_GET['page']) && $_GET['page'] != ""
             && isset($_GET['limit']) && $_GET['limit'] != "") {
 
-            $page = $_GET['page'];
-            if ($page <= 0) {
-                $page = 1;
+            if (!is_numeric($_GET['page'])) {
+                return $this->notFoundResponseWithMessage("Page value is not numeric.");
             }
-            $this->page = $page;
+
+            $this->page = $_GET['page'];
+            if ($this->page <= 0) {
+                return $this->notFoundResponseWithMessage("Page value is zero or negative.");
+            }
+
+            if (!is_numeric($_GET['limit'])) {
+                return $this->notFoundResponseWithMessage("Limit value is not numeric.");
+            }
 
             $this->limit = $_GET['limit'];
+            if ($this->limit <= 0) {
+                return $this->notFoundResponseWithMessage("Limit value is zero or negative.");
+            }
 
-            $numberOfPages = (int) ceil($this->userGateway->getUserAllTotalRows() / $this->limit);
-            $this->numberOfPages = $numberOfPages;
-
+            $this->numberOfPages = (int) ceil($this->userGateway->getUserAllTotalRows() / $this->limit);
             // If the page number is more than the total number of pages,
             // then return not found error.
             if ($this->page > $this->numberOfPages) {
-                return $this->notFoundResponse();
+                return $this->notFoundResponseWithMessage("The page is beyond the total number of pages.");
             }
+        } else {
+            return $this->notFoundResponseWithMessage("Need both page and limit values.");
         }
-
-        // Sorting
-        // TODO Create separate funcion
-        if (isset($_GET['sort_by']) && $_GET['sort_by'] != ""
-            && isset($_GET['order_by']) && $_GET['order_by'] != "") {
-
-            try {
-                $this->sort_by = $this->white_list($_GET['sort_by'],
-                                                    ["FirstName", "LastName", "Email",
-                                                    "TravelDateStart", "TravelDateEnd", "TravelReason"],
-                                                    "Invalid sortby field name");
-                $this->order_by = $this->white_list($_GET['order_by'],
-                                                    ["ASC","DESC"],
-                                                    "Invalid orderby direction");
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponseWithResponse($e->getMessage());
-                exit();
-            }
-        }
-
     }
 
-    private function getUserAll()
+    /**
+     * If the sort_by and order_by are not set, the default values are
+     * sort_by=UserId and order_by=ASC
+     */
+    private function preProcessSorting()
     {
-        $result = $this->userGateway->getUserAll();
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+        try {
+            $this->sort_by = $this->allowedValues($_GET['sort_by'],
+                                                    ["UserId", "FirstName", "LastName", "Email",
+                                                     "TravelDateStart", "TravelDateEnd", "TravelReason"],
+                                                    "Invalid sort_by field name");
+
+            $this->order_by = $this->allowedValues($_GET['order_by'],
+                                                    ["ASC","DESC"],
+                                                    "Invalid order_by direction");
+        } catch (\InvalidArgumentException $e) {
+            return $this->notFoundResponseWithMessage($e->getMessage());
+        }
     }
 
-    private function getUserAllPagination()
+    private function getUserAllPaginationSorting()
     {
         $offset = ($this->page - 1) * $this->limit;
-        $result = $this->userGateway->getUserAllLimit($offset, $this->limit);
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
-    }
-
-    private function getUserAllSorting()
-    {
-        $result = $this->userGateway->getUserAllSorting($this->sort_by, $this->order_by);
+        $result = $this->userGateway->getUserAllLimitSort($this->sort_by, $this->order_by, $offset, $this->limit);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = json_encode($result);
         return $response;
@@ -250,7 +256,7 @@ class UserController {
         return $response;
     }
 
-    private function notFoundResponseWithResponse($message)
+    private function notFoundResponseWithMessage($message)
     {
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
         $response['body'] = json_encode([
@@ -262,7 +268,7 @@ class UserController {
     /**
      * See https://phpdelusions.net/pdo_examples/order_by
      */
-    private function white_list(&$value, $allowed, $message) {
+    private function allowedValues(&$value, $allowed, $message) {
         if ($value === null) {
             return $allowed[0];
         }
