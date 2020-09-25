@@ -22,6 +22,10 @@ curl -X GET 'http://localhost/cytech/user?LastName=Vagionitis'
 
 curl -X GET 'http://localhost/cytech/user?page=1&limit=3&sort_by=LastName&order_by=DESC&TravelDateStart=2020-09-21'
 
+### GET request to generate users
+
+curl -X GET 'http://localhost/cytech/user?generate_users=1000'
+
 
 ## POST requests
 

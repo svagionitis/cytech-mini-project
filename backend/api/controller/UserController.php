@@ -25,6 +25,7 @@ class UserController {
     private $columnNames;
     private $filter_by;
     private $filter_by_value;
+    private $generate_users;
 
     private $userGateway;
 
@@ -51,6 +52,10 @@ class UserController {
         } else {
             switch ($this->requestMethod) {
                 case 'GET':
+                    if (isset($this->generate_users)) {
+                        $this->generateUsers();
+                        exit();
+                    }
                     $response = $this->getUserAllPaginationSortingFiltering();
                     break;
                 case 'POST':
@@ -95,6 +100,11 @@ class UserController {
         }
 
         $response = $this->preProcessFiltering();
+        if (isset($response)) {
+            return $response;
+        }
+
+        $response = $this->preProcessGenerateUsers();
         if (isset($response)) {
             return $response;
         }
@@ -174,6 +184,58 @@ class UserController {
                 return $this->notFoundResponseWithMessage("No value for $this->filter_by");
             }
         }
+    }
+
+    private function preProcessGenerateUsers()
+    {
+        if (isset($_GET['generate_users']) && $_GET['generate_users'] != "") {
+            if (!is_numeric($_GET['generate_users'])) {
+                return $this->notFoundResponseWithMessage("generate_users value is not numeric.");
+            }
+
+            $this->generate_users = $_GET['generate_users'];
+        }
+    }
+
+    private function generateUsers()
+    {
+        // Error: Maximum execution time of 120 seconds exceeded in
+        // https://stackoverflow.com/questions/37123111/maximum-execution-time-of-120-seconds-exceeded-in-yii2
+        set_time_limit(500);
+
+        $letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        for ($i = 0; $i < $this->generate_users; $i++) {
+            // https://code.tutsplus.com/tutorials/generate-random-alphanumeric-strings-in-php--cms-32132
+            $user['FirstName'] = substr(str_shuffle($letters), 0, mt_rand(5, 30));
+            $user['LastName'] = substr(str_shuffle($letters), 0, mt_rand(7, 50));
+            $user['Email'] = $user['FirstName'] . '.' . $user['LastName'] . '@' . substr(str_shuffle($letters), 0, mt_rand(2, 50)) . '.com';
+            // https://thisinterestsme.com/generate-random-date-php/
+            $user['TravelDateStart'] = date("Y-m-d", mt_rand(1, time()));
+            $user['TravelDateEnd'] = date("Y-m-d", mt_rand(1, time()));
+            $user['TravelReason'] = $this->genRandomString(mt_rand(1024, 10240));
+
+            print_r($i);
+            print_r($user);
+
+            $this->userGateway->addUser($user);
+        }
+    }
+
+    /**
+     * See https://www.geeksforgeeks.org/generating-random-string-using-php/
+     */
+    private function genRandomString($n)
+    {
+        $characters = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"£$%^&*(){}[]@~#?/<>_-+=';
+        $randomString = '';
+
+        for ($i = 0; $i < $n; $i++) {
+            $index = rand(0, strlen($characters) - 1);
+            $randomString .= $characters[$index];
+        }
+
+        return $randomString;
     }
 
     /**
