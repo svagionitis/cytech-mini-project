@@ -62,7 +62,7 @@ class UserGateway {
      */
     public function getUserAllLimit($offset, $limit)
     {
-        $statement = "SELECT * FROM user LIMIT ?, ?;";
+        $statement = "SELECT * FROM user LIMIT ?, ?";
 
         try {
             $statement = $this->db->prepare($statement);
@@ -83,7 +83,7 @@ class UserGateway {
      */
     public function getUserAllSorting($sort_by, $order_by)
     {
-        $statement = "SELECT * FROM user ORDER BY $sort_by $order_by;";
+        $statement = "SELECT * FROM user ORDER BY $sort_by $order_by";
 
         try {
             $statement = $this->db->prepare($statement);
@@ -101,7 +101,7 @@ class UserGateway {
      */
     public function getUserByUserId($userId)
     {
-        $statement = "SELECT * FROM user WHERE UserID = ?;";
+        $statement = "SELECT * FROM user WHERE UserID = ?";
 
         try {
             $statement = $this->db->prepare($statement);
@@ -120,7 +120,7 @@ class UserGateway {
      */
     public function getUserByEmail($email)
     {
-        $statement = "SELECT * FROM user WHERE Email = ?;";
+        $statement = "SELECT * FROM user WHERE Email = ?";
 
         try {
             $statement = $this->db->prepare($statement);
@@ -142,7 +142,7 @@ class UserGateway {
             INSERT INTO user
                 (FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason)
             VALUES
-                (:FirstName, :LastName, :Email, :TravelDateStart, :TravelDateEnd, :TravelReason);
+                (:FirstName, :LastName, :Email, :TravelDateStart, :TravelDateEnd, :TravelReason)
         ";
 
         try {
@@ -177,7 +177,7 @@ class UserGateway {
                 TravelDateEnd = :TravelDateEnd,
                 TravelReason = :TravelReason
             WHERE
-                UserId = :UserId;
+                UserId = :UserId
         ";
 
         try {
@@ -205,7 +205,7 @@ class UserGateway {
     {
         $statement = "
             DELETE FROM user
-            WHERE UserId = :UserId;
+            WHERE UserId = :UserId
         ";
 
         try {
