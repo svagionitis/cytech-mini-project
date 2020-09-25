@@ -2,15 +2,25 @@
 
 ## GET requests
 
-curl -X GET http://localhost/cytech/user
+### GET request with all the rows of the table
 
-curl -X GET http://localhost/cytech/user/userid/11
+curl -X GET 'http://localhost/cytech/user'
 
-curl -X GET http://localhost/cytech/user/email/foo.bar@foobar.tv
+### GET request with paging
 
-### GET request with offset and limit
+curl -X GET 'http://localhost/cytech/user?page=1&limit=3'
 
-curl -X GET http://localhost/cytech/user?offset=0&limit=3
+### GET request with sorting
+
+curl -X GET 'http://localhost/cytech/user?sort_by=LastName&order_by=DESC'
+
+### GET request with filtering
+
+curl -X GET 'http://localhost/cytech/user?LastName=Vagionitis'
+
+### GET request combining all the above
+
+curl -X GET 'http://localhost/cytech/user?page=1&limit=3&sort_by=LastName&order_by=DESC&TravelDateStart=2020-09-21'
 
 
 ## POST requests
