@@ -9,6 +9,7 @@ namespace Api\Gateway;
  * * add a user
  * * update a user
  * * delete a user
+ * TODO Need proper error handling.
  */
 class UserGateway {
 
@@ -20,30 +21,13 @@ class UserGateway {
     }
 
     /**
-     * Get all users from DB
-     */
-    public function getUserAll()
-    {
-        $statement = "SELECT * FROM user;";
-
-        try {
-            $statement = $this->db->query($statement);
-            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
-        } catch (\PDOException $e) {
-            echo "Error getUserAll: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /**
      * Get the total rows for the user table
      *
      * TODO: This will be slow in large dbs. Maybe try something else to improve it.
      */
     public function getUserAllTotalRows()
     {
-        $statement = "SELECT COUNT(*) AS TOTAL_COUNT FROM user;";
+        $statement = "SELECT COUNT(*) AS TOTAL_COUNT FROM user";
 
         try {
             $statement = $this->db->query($statement);
@@ -51,6 +35,60 @@ class UserGateway {
             return $result[0]["TOTAL_COUNT"];
         } catch (\PDOException $e) {
             echo "Error getUserAllTotalRows: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /**
+     * Get all users from DB
+     */
+    public function getUserAllLimitSort($sort_by, $order_by, $offset, $limit)
+    {
+        $statement = "SELECT * FROM user";
+
+        print_r("sort_by: $sort_by, order_by: $order_by, offset: $offset, limit: $limit");
+
+        if (isset($sort_by) && !empty($sort_by)) {
+            $statement .= " ORDER BY $sort_by";
+
+            // order type (ASC, DESC) needs ORDER BY
+            if (isset($order_by) && !empty($order_by)) {
+                $statement .= " $order_by";
+            }
+        }
+
+        if (isset($limit) && !empty($limit)) {
+            $statement .= " LIMIT $limit";
+
+            // OFFSET needs LIMIT
+            if (isset($offset) && !empty($offset)) {
+                $statement .= " OFFSET $offset";
+            }
+        }
+
+        try {
+            $statement = $this->db->query($statement);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            echo "Error getUserAllLimitSort: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /**
+     * Get all users from DB
+     */
+    public function getUserAll()
+    {
+        $statement = "SELECT * FROM user";
+
+        try {
+            $statement = $this->db->query($statement);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            echo "Error getUserAll: " . $e->getMessage();
             exit();
         }
     }
