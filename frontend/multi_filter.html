@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" type="image/x-icon" href="https://www.cytechmobile.com/wp-content/uploads/favicon-1-1.png" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=no">
+	<title>Cytech Mini Project - a small user database</title>
+	<link rel="stylesheet" type="text/css" href="media/css/jquery.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="resources/syntax/shCore.css">
+	<link rel="stylesheet" type="text/css" href="resources/demo.css">
+
+	<style type="text/css" class="init">
+
+		tfoot input {
+			width: 100%;
+			padding: 3px;
+			box-sizing: border-box;
+		}
+
+	</style>
+
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+	<!-- <script type="text/javascript" language="javascript" src="media/js/jquery.dataTables.js"></script> -->
+	<script type="text/javascript" language="javascript" src="resources/syntax/shCore.js"></script>
+	<script type="text/javascript" language="javascript" src="resources/demo.js"></script>
+
+	<script type="text/javascript" language="javascript" class="init">
+
+
+		$(document).ready(function() {
+			// Setup - add a text input to each footer cell
+			$('#user tfoot th').each( function () {
+				var title = $(this).text();
+				$(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+			} );
+
+			// DataTable
+			var table = $('#user').DataTable({
+				"processing": true,
+				ajax: 'http://localhost/cytech/user?page=1&limit=3',
+				columns: [
+					{ data: 'UserId' },
+					{ data: 'FirstName' },
+					{ data: 'LastName' },
+					{ data: 'Email' },
+					{ data: 'TravelDateStart' },
+					{ data: 'TravelDateEnd' },
+					{ data: 'TravelReason' }
+				],
+				initComplete: function () {
+					// Apply the search
+					this.api().columns().every( function () {
+						var that = this;
+
+						$( 'input', this.footer() ).on( 'keyup change clear', function () {
+							if ( that.search() !== this.value ) {
+								that
+									.search( this.value )
+									.draw();
+							}
+						} );
+					} );
+				}
+			});
+
+		} );
+
+	</script>
+
+</head>
+<body class="dt-user">
+	<div class="container">
+		<section>
+			<h1>Cytech Mini Project <span>A small user database</span></h1>
+			<div class="demo-html"></div>
+			<table id="user" class="display" style="width:100%">
+				<thead>
+					<tr>
+						<th>UserId</th>
+						<th>FirstName</th>
+						<th>LastName</th>
+						<th>Email</th>
+						<th>TravelDateStart</th>
+						<th>TravelDateEnd</th>
+						<th>TravelReason</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th>UserId</th>
+						<th>FirstName</th>
+						<th>LastName</th>
+						<th>Email</th>
+						<th>TravelDateStart</th>
+						<th>TravelDateEnd</th>
+						<th>TravelReason</th>
+					</tr>
+				</tfoot>
+			</table>
+		</section>
+	</div>
+</body>
+</html>
