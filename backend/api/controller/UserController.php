@@ -20,6 +20,7 @@ class UserController {
     private $page;
     private $numberOfPages;
     private $limit;
+    private $totalRows;
     private $sort_by;
     private $order_by;
     private $columnNames;
@@ -117,7 +118,8 @@ class UserController {
     private function preProcessPaging()
     {
         $this->page = 1;
-        $this->limit = 0;
+        $this->totalRows = $this->userGateway->getUserAllTotalRows();
+        $this->limit = $this->totalRows;
         if (isset($_GET['page']) && $_GET['page'] != ""
             && isset($_GET['limit']) && $_GET['limit'] != "") {
 
@@ -139,7 +141,7 @@ class UserController {
                 return $this->notFoundResponseWithMessage("Limit value is zero or negative.");
             }
 
-            $this->numberOfPages = (int) ceil($this->userGateway->getUserAllTotalRows() / $this->limit);
+            $this->numberOfPages = (int) ceil($this->totalRows / $this->limit);
             // If the page number is more than the total number of pages,
             // then return not found error.
             if ($this->page > $this->numberOfPages) {
@@ -260,8 +262,12 @@ class UserController {
         $result = $this->userGateway->getUserAllLimitSortFilter($this->filter_by, $this->filter_by_value,
                                                                 $this->sort_by, $this->order_by,
                                                                 $offset, $this->limit);
+        $output_array = ["data" => $result,
+                         "draw" => $this->page,
+                         "length" => $this->limit
+                        ];
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
+        $response['body'] = json_encode($output_array);
         return $response;
     }
 
