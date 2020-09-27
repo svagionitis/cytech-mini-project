@@ -51,9 +51,18 @@ class UserGateway {
     {
         $statement = "SELECT * FROM user";
 
-        if (isset($filter_by) && !empty($filter_by)
-            && isset($filter_by_value) && !empty($filter_by_value)) {
-            $statement .= " WHERE $filter_by = '$filter_by_value'";
+        // If only the $filter_by_value is set, then search all the columns.
+        // If both $filter_by and $filter_by_value are set, then search only in
+        // the $filter_by column.
+        if (isset($filter_by_value) && !empty($filter_by_value)) {
+            if (isset($filter_by) && !empty($filter_by)) {
+                // Search in a specific column
+                $statement .= " WHERE $filter_by = '$filter_by_value'";
+            } else {
+                // Search in all columns
+                $allColumns = "(UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason)";
+                $statement .= " WHERE '$filter_by_value' IN $allColumns";
+            }
         }
 
         if (isset($sort_by) && !empty($sort_by)) {

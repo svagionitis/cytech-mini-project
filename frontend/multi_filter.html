@@ -49,6 +49,7 @@
 			// DataTable
 			var table = $('#user').DataTable({
 				"processing": true,
+				serverSide: true,
 				ajax: 'http://localhost/cytech/user',
 				columns: [
 					{ "data": "UserID" },
