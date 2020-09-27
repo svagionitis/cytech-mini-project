@@ -11,6 +11,7 @@ use Api\Gateway\UserGateway;
  * The main class creating the REST API for the user
  *
  * TODO Need proper error handling.
+ * TODO Need to split in other classes, it's getting huge!!!
  */
 class UserController {
 
@@ -91,10 +92,12 @@ class UserController {
 
         $this->requestMethod = $_SERVER["REQUEST_METHOD"];
 
+        // TODO Check if the DataTables frontend framework is used
+        // and modify appropriatelly.
         $this->preProcessDataTablesQuery();
 
         /**
-         * Use 'draw' and 'length' for the page and limit, because the frontend framework
+         * Use 'start' and 'length' for the offset and limit, because the frontend framework
          * DataTables, https://datatables.net/manual/server-side, uses these URI query
          * parameters.
          */
@@ -147,7 +150,7 @@ class UserController {
             $this->filter_by_value = $searchDataTable['value'];
         }
 
-        // Filtering by a specific column and exact match
+        // Filtering by a specific column and regex
         foreach ($columnsDataTable as $column) {
             if (!empty($column['search']['value'])) {
                 $this->filter_by = $column['data'];
