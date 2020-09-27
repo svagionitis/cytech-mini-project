@@ -56,10 +56,11 @@ class UserGateway {
         // the $filter_by column.
         if (isset($filter_by_value) && !empty($filter_by_value)) {
             if (isset($filter_by) && !empty($filter_by)) {
-                // Search in a specific column
-                $statement .= " WHERE $filter_by = '$filter_by_value'";
+                // Search in a specific column with regex
+                $statement .= " WHERE $filter_by REGEXP '$filter_by_value'";
             } else {
-                // Search in all columns
+                // Search in all columns with exact match
+                // TODO Need a better way to get the column names
                 $allColumns = "(UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason)";
                 $statement .= " WHERE '$filter_by_value' IN $allColumns";
             }
