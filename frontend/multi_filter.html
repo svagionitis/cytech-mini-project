@@ -17,11 +17,22 @@
 			box-sizing: border-box;
 		}
 
+		/* https://stackoverflow.com/questions/38347200/solution-for-ellipsis-jquery-bootstrap-datatables
+		table.dataTable td  {
+			max-width: 500px;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
+		}
+		*/
+
 	</style>
 
 	<script type="text/javascript" language="javascript" src="media/js/jquery-3.5.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="media/js/jquery.dataTables-1.10.22.min.js"></script>
-	<!-- <script type="text/javascript" language="javascript" src="media/js/jquery.dataTables.js"></script> -->
+	<script type="text/javascript" language="javascript" src="media/js/ellipsis.js"></script>
+	<script type="text/javascript" language="javascript" src="media/js/moment.min.js"></script>
+	<script type="text/javascript" language="javascript" src="media/js/datetime.js"></script>
 	<script type="text/javascript" language="javascript" src="resources/syntax/shCore.js"></script>
 	<script type="text/javascript" language="javascript" src="resources/demo.js"></script>
 
@@ -40,13 +51,33 @@
 				"processing": true,
 				ajax: 'http://localhost/cytech/user',
 				columns: [
-					{ data: 'UserID' },
-					{ data: 'FirstName' },
-					{ data: 'LastName' },
-					{ data: 'Email' },
-					{ data: 'TravelDateStart' },
-					{ data: 'TravelDateEnd' },
-					{ data: 'TravelReason' }
+					{ "data": "UserID" },
+					{ "data": "FirstName" },
+					{ "data": "LastName" },
+					{ "data": "Email" },
+					{ "data": "TravelDateStart" },
+					{ "data": "TravelDateEnd" },
+					{ "data": "TravelReason" }
+				],
+				columnDefs: [
+					/**
+					 * Convert the date values from YYYY-MM-DD to ddd DD MMM YYYY, eg Tue 30 Jan 2018
+					 */
+					{
+						"targets": [4, 5],
+						/* https://github.com/DataTables/Plugins/blob/master/dataRender/datetime.js */
+						"render": $.fn.dataTable.render.moment('YYYY-MM-DD', 'ddd DD MMM YYYY')
+					},
+					/**
+					 * For the Email and TravelReason values which might be long, create an ellipsis
+					 * in order to hide the text in the cells. You can hover the mouse over that cell
+					 * to check the full value.
+					 */
+					{
+						"targets": [3, 6],
+						/* https://github.com/DataTables/Plugins/blob/master/dataRender/ellipsis.js */
+						"render": $.fn.dataTable.render.ellipsis(15, true)
+					}
 				],
 				initComplete: function () {
 					// Apply the search
@@ -63,7 +94,6 @@
 					} );
 				}
 			});
-
 		} );
 
 	</script>
