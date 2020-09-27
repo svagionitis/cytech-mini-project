@@ -36,6 +36,40 @@ class UserGateway {
     }
 
     /**
+     * Get the total rows for the user table which are filtered
+     *
+     * TODO This will be slow in large dbs. Maybe try something else to improve it.
+     */
+    public function getUserAllTotalRowsFiltered($filter_by, $filter_by_value)
+    {
+        $statement = "SELECT COUNT(*) AS TOTAL_COUNT_FILTER FROM user";
+
+        // If only the $filter_by_value is set, then search all the columns.
+        // If both $filter_by and $filter_by_value are set, then search only in
+        // the $filter_by column.
+        if (isset($filter_by_value) && !empty($filter_by_value)) {
+            if (isset($filter_by) && !empty($filter_by)) {
+                // Search in a specific column with regex
+                $statement .= " WHERE $filter_by REGEXP '$filter_by_value'";
+            } else {
+                // Search in all columns with exact match
+                // TODO Need a better way to get the column names
+                $allColumns = "(UserID, FirstName, LastName, Email, TravelDateStart, TravelDateEnd, TravelReason)";
+                $statement .= " WHERE '$filter_by_value' IN $allColumns";
+            }
+        }
+
+        try {
+            $statement = $this->db->query($statement);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result[0]["TOTAL_COUNT_FILTER"];
+        } catch (\PDOException $e) {
+            echo "Error getUserAllTotalRows: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /**
      * This function get the users from db and also performs some basic filtering, sorting and paging
      *
      * @param $filter_by The field name to filter the data
@@ -77,11 +111,11 @@ class UserGateway {
 
         if (isset($limit) && !empty($limit)) {
             $statement .= " LIMIT $limit";
+        }
 
-            // OFFSET needs LIMIT
-            if (isset($offset) && !empty($offset)) {
-                $statement .= " OFFSET $offset";
-            }
+        // OFFSET needs LIMIT
+        if (isset($offset) && !empty($offset)) {
+            $statement .= " OFFSET $offset";
         }
 
         try {

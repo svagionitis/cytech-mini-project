@@ -386,7 +386,7 @@ class UserController {
                                                                 $this->offset, $this->limit);
         $rowsFiltered = $this->totalRows;
         if (isset($this->filter_by)) {
-            $rowsFiltered = count($result);
+            $rowsFiltered = $this->userGateway->getUserAllTotalRowsFiltered($this->filter_by, $this->filter_by_value);
         }
 
         $output_array = ["data" => $result,
