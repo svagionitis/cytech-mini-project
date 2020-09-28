@@ -131,6 +131,15 @@ class UserController {
 
         if (isset($_GET['columns']) && $_GET['columns'] != "") {
             $columnsDataTable=$_GET['columns'];
+
+            // Filtering by a specific column and regex
+            foreach ($columnsDataTable as $column) {
+                if (!empty($column['search']['value'])) {
+                    $this->filter_by = $column['data'];
+                    $this->filter_by_value = $column['search']['value'];
+                    break;
+                }
+            }
         }
 
         // Sorting
@@ -148,15 +157,6 @@ class UserController {
 
             $this->filter_by = null;
             $this->filter_by_value = $searchDataTable['value'];
-        }
-
-        // Filtering by a specific column and regex
-        foreach ($columnsDataTable as $column) {
-            if (!empty($column['search']['value'])) {
-                $this->filter_by = $column['data'];
-                $this->filter_by_value = $column['search']['value'];
-                break;
-            }
         }
     }
 
