@@ -406,6 +406,9 @@ class UserController {
     private function addUser()
     {
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
+        if (json_last_error()) {
+            return $this->notFoundResponseWithMessage("JSON: " . json_last_error_msg());
+        }
         if (! $this->validateUser($input)) {
             return $this->unprocessableEntityResponse();
         }
@@ -427,6 +430,9 @@ class UserController {
             return $this->notFoundResponse();
         }
         $input = (array) json_decode(file_get_contents('php://input'), TRUE);
+        if (json_last_error()) {
+            return $this->notFoundResponseWithMessage("JSON: " . json_last_error_msg());
+        }
         if (! $this->validateUser($input)) {
             return $this->unprocessableEntityResponse();
         }
