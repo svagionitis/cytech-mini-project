@@ -425,7 +425,7 @@ class UserController {
      */
     private function updateUserByUserId($userId)
     {
-        $result = $this->userGateway->getUserAllLimitSortFilter('UserId', $userId, null, null, 1, 0);
+        $result = $this->userGateway->getUserAllLimitSortFilter('UserID', $userId, null, null, 0, 1, false);
         if (! $result) {
             return $this->notFoundResponse();
         }
@@ -450,7 +450,7 @@ class UserController {
      */
     private function deleteUserByUserId($userId)
     {
-        $result = $this->userGateway->getUserAllLimitSortFilter('UserId', $userId, null, null, 1, 0);
+        $result = $this->userGateway->getUserAllLimitSortFilter('UserID', $userId, null, null, 0, 1, false);
         if (! $result) {
             return $this->notFoundResponse();
         }

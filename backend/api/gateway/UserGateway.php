@@ -38,9 +38,13 @@ class UserGateway {
     /**
      * Get the total rows for the user table which are filtered
      *
+     * @param $filter_by The field name to filter the data
+     * @param $filter_by_value The value of the field name to filter the data
+     * @param $regex_filter A flag to set regex filtering or not. Default value true.
+     *
      * TODO This will be slow in large dbs. Maybe try something else to improve it.
      */
-    public function getUserAllTotalRowsFiltered($filter_by, $filter_by_value)
+    public function getUserAllTotalRowsFiltered($filter_by, $filter_by_value, $regex_filter=true)
     {
         $statement = "SELECT COUNT(*) AS TOTAL_COUNT_FILTER FROM user";
 
@@ -50,7 +54,12 @@ class UserGateway {
         if (isset($filter_by_value) && !empty($filter_by_value)) {
             if (isset($filter_by) && !empty($filter_by)) {
                 // Search in a specific column with regex
-                $statement .= " WHERE $filter_by REGEXP '$filter_by_value'";
+                if ($regex_filter) {
+                    // Search in a specific column with regex
+                    $statement .= " WHERE $filter_by REGEXP '$filter_by_value'";
+                } else {
+                    $statement .= " WHERE $filter_by = '$filter_by_value'";
+                }
             } else {
                 // Search in all columns with exact match
                 // TODO Need a better way to get the column names
@@ -78,10 +87,11 @@ class UserGateway {
      * @param $order_by The direction to sort the data ascending or descending
      * @param $offset The number of rows to skip
      * @param $limit The total number of rows to retrieve
+     * @param $regex_filter A flag to set regex filtering or not. Default value true.
      *
      * TODO Needs a proper query builder to do any checks and everything
      */
-    public function getUserAllLimitSortFilter($filter_by, $filter_by_value, $sort_by, $order_by, $offset, $limit)
+    public function getUserAllLimitSortFilter($filter_by, $filter_by_value, $sort_by, $order_by, $offset, $limit, $regex_filter=true)
     {
         $statement = "SELECT * FROM user";
 
@@ -91,7 +101,12 @@ class UserGateway {
         if (isset($filter_by_value) && !empty($filter_by_value)) {
             if (isset($filter_by) && !empty($filter_by)) {
                 // Search in a specific column with regex
-                $statement .= " WHERE $filter_by REGEXP '$filter_by_value'";
+                if ($regex_filter) {
+                    // Search in a specific column with regex
+                    $statement .= " WHERE $filter_by REGEXP '$filter_by_value'";
+                } else {
+                    $statement .= " WHERE $filter_by = '$filter_by_value'";
+                }
             } else {
                 // Search in all columns with exact match
                 // TODO Need a better way to get the column names
