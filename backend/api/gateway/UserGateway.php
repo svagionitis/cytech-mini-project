@@ -160,9 +160,9 @@ class UserGateway {
     }
 
     /**
-     * Update a user with a specific UserId (SQL UPDATE)
+     * Update a user with a specific UserID (SQL UPDATE)
      *
-     * @param $userId The UserId of the user to update
+     * @param $userId The UserID of the user to update
      * @param $input An array with the values to be updated
      */
     public function updateUserByUserId($userId, Array $input)
@@ -177,13 +177,13 @@ class UserGateway {
                 TravelDateEnd = :TravelDateEnd,
                 TravelReason = :TravelReason
             WHERE
-                UserId = :UserId
+                UserID = :UserID
         ";
 
         try {
             $statement = $this->db->prepare($statement);
             $statement->execute(array(
-                ':UserId' => (int) $userId,
+                ':UserID' => (int) $userId,
                 ':FirstName' => $input['FirstName'],
                 ':LastName'  => $input['LastName'],
                 ':Email' => $input['Email'],
@@ -199,7 +199,7 @@ class UserGateway {
     }
 
     /**
-     * Delete a user with a specific UserId (SQL DELETE)
+     * Delete a user with a specific UserID (SQL DELETE)
      *
      * @param $userId The UserId of the user to delete
      */
@@ -207,12 +207,12 @@ class UserGateway {
     {
         $statement = "
             DELETE FROM user
-            WHERE UserId = :UserId
+            WHERE UserID = :UserID
         ";
 
         try {
             $statement = $this->db->prepare($statement);
-            $statement->execute(array(':UserId' => $userId));
+            $statement->execute(array(':UserID' => $userId));
             return $statement->rowCount();
         } catch (\PDOException $e) {
             echo "Error deleteUserByUserId: " . $e->getMessage();
