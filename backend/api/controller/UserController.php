@@ -106,9 +106,16 @@ class UserController {
             return $response;
         }
 
-        $response = $this->preProcessSorting();
-        if (isset($response)) {
-            return $response;
+
+        /**
+         * If there is no URI query order from DataTables,
+         * use the default options
+         */
+        if (!isset($_GET['order'])) {
+            $response = $this->preProcessSorting();
+            if (isset($response)) {
+                return $response;
+            }
         }
 
         $response = $this->preProcessFiltering();
